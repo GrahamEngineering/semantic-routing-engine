@@ -1,0 +1,1 @@
+# Pure Python standard library - zero external dependencies required\n# Optional high-throughput vector backends:\n# fastembed>=0.2.0\n# requests>=2.31.0\n

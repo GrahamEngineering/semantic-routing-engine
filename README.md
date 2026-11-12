@@ -1,5 +1,5 @@
 # Semantic Routing Engine (SRE)
-> **Open Source API <-> SDK Interface for Intent-Driven Agent Architectures**  
+> **Open Source API &harr; SDK Interface for Intent-Driven Agent Architectures**  
 > Licensed under the Apache License, Version 2.0  
 > **Release:** v1.1.0 (The "Chef's Kiss" Interactive Edition)
 

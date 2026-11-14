@@ -76,5 +76,16 @@ The core router uses zero-dependency token vector mathematics and set intersecti
 
 ---
 
+## 🛡️ Downstream Practical Applications & Defensive Prior Art
+
+Want to see how downstream systems consume the real-time semantic and affective telemetry vectors emitted by this engine?
+
+Explore our dedicated **[Defensive Publications & Prior Art Disclosures](https://github.com/GrahamEngineering/defensive-publications)** vault. It documents real-world reference architectures, mathematical formulations, and UI flight deck integrations built directly on top of the Semantic Routing Engine—published openly under Apache 2.0 to establish irrevocable prior art (35 U.S.C. § 102) and protect freedom to operate against patent trolls:
+
+* **[DISC-001: Affective Telemetry Modulation (The German House Dynamic Invariant)](https://github.com/GrahamEngineering/defensive-publications/blob/main/disclosures/001-affective-canvas-german-house.md)**: Real-time UI modulation where canvas borders, pulsing frequencies, and color palettes dynamically attune to human vocal stress, urgency, and colloquial prompts (bridging the *"Phone Guy / Monkey Brain"* intuition to the *"Super-Brain"* mathematical execution).
+* *(More disclosures staging continuously...)*
+
+---
+
 ## 📄 License
 Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.

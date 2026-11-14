@@ -13,6 +13,7 @@ Instead of forcing users or developers to memorize brittle slash commands (`/led
 
 You can test the engine live in your browser:
 * **Live Web Instance:** [https://didyoulosetheplot.com](https://didyoulosetheplot.com)
+* **Practical Implementations & Prior Art Vault:** [https://didyoulosetheplot.com/implementations.html](https://didyoulosetheplot.com/implementations.html) (or locally via [`demo/implementations.html`](demo/implementations.html))
 * **Local Offline Cockpit:** Double-click [`demo/index.html`](demo/index.html) in any browser.
 
 ### Key Interactive Features in the Cockpit:

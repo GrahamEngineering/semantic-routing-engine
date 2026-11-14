@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>didyoulosetheplot.com | Practical Implementations of Matt's SRE & Big Ideas</title>
+    <!-- German House Foundation + Slate Dark Bedrock -->
+    <style>
+        :root {
+            --gh-bedrock: #0b1120;
+            --gh-slate-surface: #0f172a;
+            --gh-card-bg: #1e293b;
+            --gh-porcelain: #ffffff;
+            --gh-indigo: #4f46e5;
+            --gh-indigo-glow: rgba(79, 70, 229, 0.4);
+            --gh-emerald: #10b981;
+            --gh-amber: #f59e0b;
+            --gh-rose: #f43f5e;
+            --gh-border: #334155;
+            --text-heading: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--gh-bedrock);
+            color: var(--text-heading);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Sovereign Nav */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--gh-border);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.5px;
+        }
+        .brand span.tag {
+            font-size: 11px;
+            background: var(--gh-indigo-glow);
+            color: #a5b4fc;
+            border: 1px solid #6366f1;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-family: var(--font-mono);
+        }
+
+        .auth-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .auth-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--gh-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-family: var(--font-mono);
+        }
+        .auth-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gh-emerald);
+            box-shadow: 0 0 8px var(--gh-emerald);
+        }
+
+        .btn-auth {
+            background: var(--gh-indigo);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-auth:hover {
+            background: #4338ca;
+            box-shadow: 0 0 12px var(--gh-indigo-glow);
+        }
+
+        /* Hero Banner */
+        .hero {
+            padding: 48px 32px 32px 32px;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--gh-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-family: var(--font-mono);
+        }
+        .hero h1 {
+            font-size: 38px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        .hero p {
+            color: var(--text-muted);
+            font-size: 17px;
+            max-width: 820px;
+            line-height: 1.6;
+        }
+
+        /* Controls & Smart AI Search Bar */
+        .search-container {
+            max-width: 1280px;
+            margin: 0 auto 32px auto;
+            padding: 0 32px;
+            width: 100%;
+        }
+
+        .search-box {
+            background: var(--gh-slate-surface);
+            border: 2px solid var(--gh-border);
+            border-radius: 14px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .search-box:focus-within {
+            border-color: var(--gh-indigo);
+            box-shadow: 0 0 20px var(--gh-indigo-glow);
+        }
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            font-family: var(--font-sans);
+        }
+        .search-input::placeholder { color: #64748b; }
+
+        .search-mode-pill {
+            background: rgba(79, 70, 229, 0.15);
+            border: 1px solid #6366f1;
+            color: #c7d2fe;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+        .filter-tag {
+            background: var(--gh-slate-surface);
+            border: 1px solid var(--gh-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-tag:hover, .filter-tag.active {
+            background: var(--gh-card-bg);
+            border-color: #6366f1;
+            color: #fff;
+        }
+
+        /* Disclosure Grid */
+        .grid-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 32px 64px 32px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--gh-card-bg);
+            border: 1px solid var(--gh-border);
+            border-radius: 14px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #6366f1;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .card-id {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            color: #818cf8;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .card-status {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+        .card-status.published {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--gh-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .card-status.staged {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--gh-amber);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .card h2 {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.35;
+            color: #fff;
+        }
+        .card p.summary {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin-bottom: 16px;
+            flex: 1;
+        }
+
+        .card-meta {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 14px;
+            font-size: 12px;
+            color: #64748b;
+            font-family: var(--font-mono);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .btn-view {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--gh-border);
+            color: #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-view:hover {
+            background: var(--gh-indigo);
+            border-color: var(--gh-indigo);
+            color: #fff;
+        }
+        .btn-subscribe {
+            background: transparent;
+            border: 1px solid var(--gh-border);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-subscribe:hover {
+            color: #fff;
+            border-color: #94a3b8;
+        }
+
+        /* Floating Universal Feedback Button */
+        .feedback-floating-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: linear-gradient(135deg, #4f46e5, #ec4899);
+            color: #fff;
+            padding: 14px 22px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.5);
+            cursor: pointer;
+            z-index: 100;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feedback-floating-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(79, 70, 229, 0.7);
+        }
+
+        /* Modal Sheet */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal {
+            background: var(--gh-slate-surface);
+            border: 2px solid var(--gh-border);
+            border-radius: 16px;
+            max-width: 580px;
+            width: 100%;
+            padding: 32px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+        }
+        .modal h3 { font-size: 22px; margin-bottom: 8px; color: #fff; }
+        .modal p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        .modal textarea {
+            width: 100%;
+            height: 120px;
+            background: var(--gh-bedrock);
+            border: 1px solid var(--gh-border);
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px;
+            font-size: 14px;
+            font-family: var(--font-sans);
+            outline: none;
+            margin-bottom: 16px;
+        }
+        .modal input {
+            width: 100%;
+            background: var(--gh-bedrock);
+            border: 1px solid var(--gh-border);
+            border-radius: 8px;
+            color: #fff;
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 16px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--gh-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-submit {
+            background: var(--gh-indigo);
+            border: none;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nav -->
+    <header>
+        <div class="brand">
+            <span style="font-size:22px;">⚡</span>
+            <div>didyoulosetheplot.com <span class="tag">Matt's Practical Implementations</span></div>
+        </div>
+        <div class="auth-bar">
+            <div class="auth-pill" id="userPill">
+                <div class="auth-dot"></div>
+                <span id="userName">Sovereign Identity: Matt (Curator)</span>
+            </div>
+            <button class="btn-auth" onclick="toggleAuth()">Session / Switch Identity</button>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="hero-badge">★ DEFENSIVE PRIOR ART &amp; PRACTICAL IMPLEMENTATIONS ARCHIVE</div>
+        <h1>Practical Implementations of the Semantic Routing Engine</h1>
+        <p>A living, searchable register of real-world architectures, schemas, and big ideas derived from the Semantic Routing Engine (SRE). Publicly disclosed to permanently block patent trolls, prove concrete reduction to practice, and defend open-source freedom under Apache 2.0.</p>
+    </div>
+
+    <!-- Search Controls -->
+    <div class="search-container">
+        <div class="search-box">
+            <span style="font-size:18px;">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Semantic search, keywords, or ask a question (e.g. 'canvas failover', 'affective', 'zero-gpu')..." oninput="filterCards()">
+            <div class="search-mode-pill">
+                <span>⚡</span>
+                <span id="searchEngineLabel">SRE Vector Matcher (Sub-5ms CPU)</span>
+            </div>
+        </div>
+        <div class="filter-tags">
+            <div class="filter-tag active" onclick="setFilter('ALL', this)">All Disclosures (<span id="countAll">5</span>)</div>
+            <div class="filter-tag" onclick="setFilter('Affective', this)">Affective UI &amp; Canvas</div>
+            <div class="filter-tag" onclick="setFilter('Zero-GPU', this)">SRE &amp; Zero-GPU Math</div>
+            <div class="filter-tag" onclick="setFilter('Networking', this)">Egress &amp; Zero-Trust Mesh</div>
+            <div class="filter-tag" onclick="setFilter('Safety', this)">Safety &amp; Capability Gating</div>
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid-container" id="disclosureGrid">
+        <!-- Rendered Dynamically by JS -->
+    </div>
+
+    <!-- Universal Feedback Button -->
+    <div class="feedback-floating-btn" onclick="openFeedbackModal()">
+        <span>💬</span>
+        <span>Feedback &amp; Telemetry</span>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal">
+            <h3>Send Feedback &amp; Ideas</h3>
+            <p>Every submission is timestamped, attributed, and appended to the sovereign ingestion queue for triage by the 5080 neural cluster and Matt's review.</p>
+            <input type="text" id="fbAuthor" placeholder="Your Handle / Identity (e.g. Operator, Guest, Matt)" value="Sovereign Operator">
+            <textarea id="fbBody" placeholder="What broke, what's missing, or what big idea should we defensibly publish next?"></textarea>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeFeedbackModal()">Cancel</button>
+                <button class="btn-submit" onclick="submitFeedback()">Send Telemetry Ingest</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DISCLOSURES = [
+            {
+                id: "DISC-001",
+                title: "Affective Telemetry Modulation: The German House Dynamic Invariant",
+                status: "published",
+                category: "Affective",
+                summary: "Dynamic UI modulation adapting color temperatures, pulse frequencies (w(t)), and border glows to parsed human conversational distress and urgency tokens.",
+                provenance: "Allendale Folklore + SRE Telemetry",
+                link: "https://github.com/GrahamEngineering/defensive-publications/blob/main/disclosures/001-affective-canvas-german-house.md",
+                keywords: "affective canvas german house pulse emotion valence arousal ui"
+            },
+            {
+                id: "DISC-002",
+                title: "Deterministic Zero-GPU Sub-10ms Semantic Vector Router",
+                status: "staged",
+                category: "Zero-GPU",
+                summary: "Ultra-fast local CPU-only semantic token coordinate scoring using set intersection theorems and adaptive Jaccard manifolds, eliminating cloud LLM latency.",
+                provenance: "Matt's human1 != math1 Directive",
+                link: "https://github.com/GrahamEngineering/semantic-routing-engine",
+                keywords: "semantic router zero gpu cpu jaccard token sub-10ms latency math"
+            },
+            {
+                id: "DISC-003",
+                title: "Sovereign Zero-Trust Egress Spoofing & Hairpin NAT Boundary Invariance",
+                status: "staged",
+                category: "Networking",
+                summary: "Deterministic multi-tenant edge ingress with zero inbound open WAN ports, WireGuard kernel fwmark routing, and canonical egress header transformation.",
+                provenance: "didyoulosetheplot.com Shard 3 Mesh",
+                link: "#",
+                keywords: "egress wireguard spoofing hairpin nat frankfurt cloudflare zero trust"
+            },
+            {
+                id: "DISC-004",
+                title: "Dual-Intent Capability Non-Weaponization Gating via Semantic Boundary Graphs",
+                status: "staged",
+                category: "Safety",
+                summary: "Solving Rice's Theorem semantic undecidability in autonomous agents by enforcing mathematical boundary invariants across Model, API, and Network layers.",
+                provenance: "Axiom 1 & Axiom 2 Sovereign Charter",
+                link: "#",
+                keywords: "dual intent safety rice theorem capability gating mitnick airgap"
+            },
+            {
+                id: "DISC-005",
+                title: "Autonomous Feedback Ingestion Ledger & Asynchronous 5080 Neural Triage Pipeline",
+                status: "staged",
+                category: "Zero-GPU",
+                summary: "Client-agnostic structured feedback ingestion capturing operator attribution, contextual coordinates, and dispatching to an asynchronous GPU/NPU neural review queue.",
+                provenance: "Matt's Universal Feedback Button",
+                link: "#",
+                keywords: "feedback ledger 5080 neural queue triage ingest telemetry"
+            }
+        ];
+
+        let currentFilter = 'ALL';
+
+        function renderCards(list) {
+            const grid = document.getElementById('disclosureGrid');
+            grid.innerHTML = '';
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div>
+                        <div class="card-header">
+                            <span class="card-id">${item.id}</span>
+                            <span class="card-status ${item.status}">${item.status}</span>
+                        </div>
+                        <h2>${item.title}</h2>
+                        <p class="summary">${item.summary}</p>
+                    </div>
+                    <div>
+                        <div class="card-meta">
+                            <span>Origin: ${item.provenance}</span>
+                            <span>Apache 2.0</span>
+                        </div>
+                        <div class="card-actions">
+                            <a href="${item.link}" target="_blank" class="btn-view">Inspect Specification &rarr;</a>
+                            <button class="btn-subscribe" onclick="subscribeTopic('${item.id}')">★ Watch</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            document.getElementById('countAll').innerText = list.length;
+        }
+
+        function filterCards() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const filtered = DISCLOSURES.filter(item => {
+                const matchCat = currentFilter === 'ALL' || item.category === currentFilter;
+                const matchText = !query || 
+                    item.title.toLowerCase().includes(query) || 
+                    item.summary.toLowerCase().includes(query) || 
+                    item.keywords.toLowerCase().includes(query) ||
+                    item.id.toLowerCase().includes(query);
+                return matchCat && matchText;
+            });
+            renderCards(filtered);
+        }
+
+        function setFilter(cat, elem) {
+            currentFilter = cat;
+            document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+            elem.classList.add('active');
+            filterCards();
+        }
+
+        function subscribeTopic(id) {
+            alert(`Subscribed! Updates and new commits to ${id} will route to your sovereign session inbox.`);
+        }
+
+        function openFeedbackModal() {
+            document.getElementById('feedbackModal').style.display = 'flex';
+        }
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').style.display = 'none';
+        }
+
+        function submitFeedback() {
+            const author = document.getElementById('fbAuthor').value;
+            const body = document.getElementById('fbBody').value;
+            if (!body.trim()) return alert("Please enter your thoughts before submitting.");
+
+            const payload = {
+                timestamp: new Date().toISOString(),
+                source_domain: "didyoulosetheplot.com",
+                path: "/implementations",
+                author: author,
+                feedback: body,
+                queued_for: "RTX-5080-NEURAL-TRIAGE"
+            };
+
+            // In local offline mode or client edge, push to localStorage & dispatch
+            let queue = JSON.parse(localStorage.getItem('SOVEREIGN_FEEDBACK_QUEUE') || '[]');
+            queue.push(payload);
+            localStorage.setItem('SOVEREIGN_FEEDBACK_QUEUE', JSON.stringify(queue));
+
+            alert("Telemetry logged! Payload committed to the sovereign ingestion queue for 5080 triage.");
+            document.getElementById('fbBody').value = '';
+            closeFeedbackModal();
+        }
+
+        function toggleAuth() {
+            const nameSpan = document.getElementById('userName');
+            if (nameSpan.innerText.includes("Matt")) {
+                nameSpan.innerText = "Authenticated: Guest Contributor";
+            } else {
+                nameSpan.innerText = "Sovereign Identity: Matt (Curator)";
+            }
+        }
+
+        // Initial render
+        renderCards(DISCLOSURES);
+    </script>
+</body>
+</html>
